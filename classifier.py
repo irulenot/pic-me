@@ -16,9 +16,9 @@ class Classifier:
         class_id = prediction.argmax().item()
         score = prediction[class_id].item()
         category_name = self.weights.meta["categories"][class_id]
-        return category_name, score
+        return category_name, str(round(score, 3) * 100) + "%"
 
-classifier = Classifier()
-img_path = "meowster.jpeg"
-category_name, score = classifier.forward(img_path)
-print(f"{category_name}: {100 * score:.1f}%")
+# classifier = Classifier()
+# img_path = "meowster.jpeg"
+# category_name, score = classifier.forward(img_path)
+# print(f"{category_name}: {100 * score:.1f}%")

@@ -1,12 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Incontinentia AI</title>
-</head>
-<body>
-  <h1>In the studio today</h1>
-  <p>Do you perform the natural obligations?</p>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Incontinentia AI</title>
+  </head>
+  <body>
+    <h1>In the studio today</h1>
+    <p>Do you perform the natural obligations?</p>
+
+    <label for="image-uploader">Upload</label>
+    <input
+      type="file"
+      name="image"
+      id="image-uploader"
+      accept="image/png, image/jpeg"
+    />
+    <div class="preview">
+      <p>No files currently selected for upload</p>
+    </div>
+    <div>
+      <button id="upload-button" onclick="">Submit</button>
+    </div>
+
+    <div id="results"></div>
+    <script>
+      const input = document.querySelector('input');
+      const preview = document.querySelector('.preview');
+      const button = document.querySelector('#upload-button');
+      const results = document.querySelector('#results');
+      input.addEventListener('change', updateImageDisplay);
+      button.addEventListener('click', async function () {
+        const imageInput = document.getElementById('image-uploader');
+        const file = imageInput.files[0];
+
+        if (!file) {
+          alert('Please select a file.');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+          const response = await fetch(
+            'http://127.0.0.1:5000/upload-image',
+            {
+              method: 'POST',
+              body: formData,
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              'Network response was not ok ' + response.statusText
+            );
+          }
+
+          const result = await response.json();
+          const resultsEl = document.createElement('results');
+          resultsEl.textContent = 'Success: ' + result.message;
+          results.appendChild(resultsEl);
+        } catch (error) {
+          console.error('Error:', error);
+          resultsEl.textContent =
+            'Failed to upload image: ' + error.message;
+        }
+      });
+
+      const fileTypes = [
+        'image/apng',
+        'image/bmp',
+        'image/gif',
+        'image/jpeg',
+        'image/pjpeg',
+        'image/png',
+        'image/svg+xml',
+        'image/tiff',
+        'image/webp',
+        'image/x-icon',
+      ];
+
+      function validFileType(file) {
+        return fileTypes.includes(file.type);
+      }
+
+      function returnFileSize(number) {
+        if (number < 1e3) {
+          return `${number} bytes`;
+        } else if (number >= 1e3 && number < 1e6) {
+          return `${(number / 1e3).toFixed(1)} KB`;
+        } else {
+          return `${(number / 1e6).toFixed(1)} MB`;
+        }
+      }
+
+      function updateImageDisplay() {
+        while (preview.firstChild) {
+          preview.removeChild(preview.firstChild);
+        }
+
+        const curFiles = input.files;
+        if (curFiles.length === 0) {
+          const para = document.createElement('p');
+          para.textContent = 'No files currently selected for upload';
+          preview.appendChild(para);
+        } else {
+          const list = document.createElement('ol');
+          preview.appendChild(list);
+
+          for (const file of curFiles) {
+            const listItem = document.createElement('li');
+            const para = document.createElement('p');
+            if (validFileType(file)) {
+              para.textContent = `File name ${
+                file.name
+              }, file size ${returnFileSize(file.size)}.`;
+              const image = document.createElement('img');
+              image.src = URL.createObjectURL(file);
+              image.alt = image.title = file.name;
+
+              listItem.appendChild(image);
+              listItem.appendChild(para);
+            } else {
+              para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+              listItem.appendChild(para);
+            }
+
+            list.appendChild(listItem);
+          }
+        }
+      }
+    </script>
+  </body>
 </html>
