@@ -1,11 +1,11 @@
 from torchvision.io import read_image
-from torchvision.models import resnet50, ResNet50_Weights
+from torchvision.models import resnet18, ResNet18_Weights
 
 img = read_image("meowster.jpeg")
 
 # Step 1: Initialize model with the best available weights
-weights = ResNet50_Weights.DEFAULT
-model = resnet50(weights=weights)
+weights = ResNet18_Weights.DEFAULT
+model = resnet18(weights=weights)
 model.eval()
 
 # Step 2: Initialize the inference transforms
